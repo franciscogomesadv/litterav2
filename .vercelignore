@@ -1,0 +1,8 @@
+# Vercel Build Cache - Force Rebuild
+# Generated: 2026-05-23 12:55 UTC
+# Issue: nav-analise-risco tab not deploying
+
+.git
+.gitignore
+.env.local
+.env.*.local

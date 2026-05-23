@@ -1,0 +1,6 @@
+BUILD_ID=v3.1-fixes-22-05-2026
+TIMESTAMP=2026-05-22T22:00:00Z
+FORCE_REBUILD=true
+
+# Force Vercel to recognize changes and rebuild
+# This file triggers a complete rebuild on Vercel

@@ -1,0 +1,354 @@
+{
+  "movimentos": [
+    {
+      "nome": "Citação",
+      "sinonimos": ["citado", "ser citado", "citação"],
+      "tipo_processo": ["Cível", "Federal", "Administrativa"],
+      "dias_uteis": 15,
+      "acoes": ["Contestação", "Reconvenção"],
+      "gravidade": "crítica",
+      "descricao": "Ato processual que notifica o réu sobre a ação"
+    },
+    {
+      "nome": "Intimação",
+      "sinonimos": ["intimado", "ser intimado"],
+      "tipo_processo": ["Cível", "Federal", "Trabalhista"],
+      "dias_uteis": 10,
+      "acoes": ["Resposta", "Manifestação"],
+      "gravidade": "crítica",
+      "descricao": "Notificação para apresentar documento ou comparecer"
+    },
+    {
+      "nome": "Notificação",
+      "sinonimos": ["notificado", "notificar"],
+      "tipo_processo": ["Cível", "Federal", "Administrativa"],
+      "dias_uteis": 5,
+      "acoes": ["Resposta Imediata", "Manifestação Urgente"],
+      "gravidade": "crítica",
+      "descricao": "Comunicação processual sobre decisão ou ato"
+    },
+    {
+      "nome": "Decisão de Admissibilidade",
+      "sinonimos": ["admissibilidade", "decisão admissibilidade"],
+      "tipo_processo": ["Cível", "Federal"],
+      "dias_uteis": 15,
+      "acoes": ["Agravo", "Contrarrazões"],
+      "gravidade": "alta",
+      "descricao": "Decisão sobre admissão do recurso"
+    },
+    {
+      "nome": "Sentença",
+      "sinonimos": ["sentenciado", "decisão de primeira instância"],
+      "tipo_processo": ["Cível", "Federal", "Trabalhista"],
+      "dias_uteis": 15,
+      "acoes": ["Recurso de Apelação", "Embargos de Declaração"],
+      "gravidade": "crítica",
+      "descricao": "Decisão final da primeira instância"
+    },
+    {
+      "nome": "Acórdão",
+      "sinonimos": ["acordão", "decisão de segunda instância"],
+      "tipo_processo": ["Cível", "Federal", "Trabalhista"],
+      "dias_uteis": 15,
+      "acoes": ["Recurso Extraordinário", "Embargos de Declaração"],
+      "gravidade": "alta",
+      "descricao": "Decisão do tribunal de apelação"
+    },
+    {
+      "nome": "Embargos de Declaração",
+      "sinonimos": ["embargos", "esclarecimento"],
+      "tipo_processo": ["Cível", "Federal", "Trabalhista"],
+      "dias_uteis": 5,
+      "acoes": ["Manifestação", "Aguardar Resposta"],
+      "gravidade": "média",
+      "descricao": "Recurso para esclarecer obscuridade da decisão"
+    },
+    {
+      "nome": "Recurso de Apelação",
+      "sinonimos": ["apelação", "recurso apelação"],
+      "tipo_processo": ["Cível", "Federal"],
+      "dias_uteis": 15,
+      "acoes": ["Contrarrazões", "Aguardar Julgamento"],
+      "gravidade": "alta",
+      "descricao": "Recurso para segunda instância"
+    },
+    {
+      "nome": "Agravo",
+      "sinonimos": ["agravo de instrumento"],
+      "tipo_processo": ["Cível", "Federal", "Trabalhista"],
+      "dias_uteis": 15,
+      "acoes": ["Contrarrazões", "Aguardar Decisão"],
+      "gravidade": "alta",
+      "descricao": "Recurso contra decisão interlocutória"
+    },
+    {
+      "nome": "Recurso Extraordinário",
+      "sinonimos": ["extraordinário", "STF"],
+      "tipo_processo": ["Cível", "Federal"],
+      "dias_uteis": 15,
+      "acoes": ["Contrarrazões", "Aguardar Julgamento STF"],
+      "gravidade": "média",
+      "descricao": "Recurso para Supremo Tribunal Federal"
+    },
+    {
+      "nome": "Recurso Especial",
+      "sinonimos": ["especial", "STJ"],
+      "tipo_processo": ["Cível", "Federal"],
+      "dias_uteis": 15,
+      "acoes": ["Contrarrazões", "Aguardar Julgamento STJ"],
+      "gravidade": "média",
+      "descricao": "Recurso para Superior Tribunal de Justiça"
+    },
+    {
+      "nome": "Manifestação de Vontade",
+      "sinonimos": ["manifestação", "vontade"],
+      "tipo_processo": ["Cível", "Federal"],
+      "dias_uteis": 10,
+      "acoes": ["Resposta", "Aguardar Decisão"],
+      "gravidade": "média",
+      "descricao": "Comunicação da posição processual"
+    },
+    {
+      "nome": "Contestação",
+      "sinonimos": ["contestado"],
+      "tipo_processo": ["Cível", "Federal"],
+      "dias_uteis": 15,
+      "acoes": ["Tréplica", "Aguardar Decisão"],
+      "gravidade": "crítica",
+      "descricao": "Resposta do réu à ação"
+    },
+    {
+      "nome": "Tréplica",
+      "sinonimos": ["tréplica", "resposta à contestação"],
+      "tipo_processo": ["Cível", "Federal"],
+      "dias_uteis": 15,
+      "acoes": ["Aguardar Decisão"],
+      "gravidade": "média",
+      "descricao": "Resposta do autor à contestação"
+    },
+    {
+      "nome": "Audiência de Conciliação",
+      "sinonimos": ["conciliação", "audiência"],
+      "tipo_processo": ["Cível", "Trabalhista"],
+      "dias_uteis": 0,
+      "acoes": ["Comparecer", "Designar Advogado"],
+      "gravidade": "crítica",
+      "descricao": "Tentativa de acordo entre as partes"
+    },
+    {
+      "nome": "Audiência de Instrução",
+      "sinonimos": ["instrução", "julgamento"],
+      "tipo_processo": ["Cível", "Trabalhista"],
+      "dias_uteis": 0,
+      "acoes": ["Comparecer", "Apresentar Provas"],
+      "gravidade": "crítica",
+      "descricao": "Audiência para instrução do processo"
+    },
+    {
+      "nome": "Decisão",
+      "sinonimos": ["decisão", "despacho"],
+      "tipo_processo": ["Cível", "Federal", "Trabalhista"],
+      "dias_uteis": 0,
+      "acoes": ["Analisar Decisão", "Preparar Recurso"],
+      "gravidade": "alta",
+      "descricao": "Decisão judicial sobre o caso"
+    },
+    {
+      "nome": "Suspensão de Exigibilidade",
+      "sinonimos": ["suspensão", "exigibilidade"],
+      "tipo_processo": ["Cível", "Administrativa"],
+      "dias_uteis": 0,
+      "acoes": ["Aguardar Retomada"],
+      "gravidade": "baixa",
+      "descricao": "Suspensão temporária da execução"
+    },
+    {
+      "nome": "Indenização por Dano Moral",
+      "sinonimos": ["dano moral", "indenização"],
+      "tipo_processo": ["Cível", "Trabalhista"],
+      "dias_uteis": 15,
+      "acoes": ["Manifestação", "Recurso"],
+      "gravidade": "alta",
+      "descricao": "Condenação por danos morais"
+    },
+    {
+      "nome": "Pagamento em Consignação",
+      "sinonimos": ["consignação", "pagamento"],
+      "tipo_processo": ["Cível"],
+      "dias_uteis": 10,
+      "acoes": ["Manifestação", "Levantamento"],
+      "gravidade": "média",
+      "descricao": "Depósito judicial do valor em disputa"
+    },
+    {
+      "nome": "Liminar",
+      "sinonimos": ["medida cautelar", "antecipação"],
+      "tipo_processo": ["Cível", "Federal", "Trabalhista"],
+      "dias_uteis": 0,
+      "acoes": ["Cumprir Decisão", "Agravo"],
+      "gravidade": "crítica",
+      "descricao": "Decisão imediata para evitar dano irreparável"
+    },
+    {
+      "nome": "Recurso Ordinário",
+      "sinonimos": ["ordinário", "recurso ordinário"],
+      "tipo_processo": ["Trabalhista"],
+      "dias_uteis": 15,
+      "acoes": ["Contrarrazões", "Aguardar Julgamento"],
+      "gravidade": "alta",
+      "descricao": "Recurso para tribunal superior trabalhista"
+    },
+    {
+      "nome": "Dissídio Coletivo",
+      "sinonimos": ["dissídio", "coletivo"],
+      "tipo_processo": ["Trabalhista"],
+      "dias_uteis": 30,
+      "acoes": ["Manifestação", "Apresentar Provas"],
+      "gravidade": "média",
+      "descricao": "Ação para negociação coletiva de direitos"
+    },
+    {
+      "nome": "Ação Rescisória",
+      "sinonimos": ["rescisória"],
+      "tipo_processo": ["Cível", "Federal"],
+      "dias_uteis": 2,
+      "acoes": ["Contactar Advogado Urgentemente"],
+      "gravidade": "crítica",
+      "descricao": "Prazo para contestar ação rescisória"
+    },
+    {
+      "nome": "Mandado de Segurança",
+      "sinonimos": ["segurança", "mandado"],
+      "tipo_processo": ["Federal", "Administrativa"],
+      "dias_uteis": 10,
+      "acoes": ["Manifestação", "Recursos"],
+      "gravidade": "alta",
+      "descricao": "Ação para proteger direito certo e incontestável"
+    },
+    {
+      "nome": "Obrigações",
+      "sinonimos": ["obrigação", "obrigado"],
+      "tipo_processo": ["Cível"],
+      "dias_uteis": 15,
+      "acoes": ["Manifestação", "Cumprimento"],
+      "gravidade": "média",
+      "descricao": "Decisão impondo obrigação de fazer ou não fazer"
+    },
+    {
+      "nome": "Cédula de Crédito Bancário",
+      "sinonimos": ["cédula", "crédito"],
+      "tipo_processo": ["Cível", "Federal"],
+      "dias_uteis": 5,
+      "acoes": ["Pagamento Urgente", "Defesa"],
+      "gravidade": "crítica",
+      "descricao": "Cobrança executiva de crédito bancário"
+    },
+    {
+      "nome": "Contratos Bancários",
+      "sinonimos": ["contrato", "bancário"],
+      "tipo_processo": ["Cível"],
+      "dias_uteis": 15,
+      "acoes": ["Análise Contratual", "Defesa"],
+      "gravidade": "média",
+      "descricao": "Litígio sobre contrato bancário"
+    },
+    {
+      "nome": "Vícios de Construção",
+      "sinonimos": ["vício", "construção"],
+      "tipo_processo": ["Cível"],
+      "dias_uteis": 10,
+      "acoes": ["Perícia", "Manifestação"],
+      "gravidade": "média",
+      "descricao": "Ação sobre defeitos na construção"
+    },
+    {
+      "nome": "Despejo por Inadimplemento",
+      "sinonimos": ["despejo", "inadimplemento"],
+      "tipo_processo": ["Cível"],
+      "dias_uteis": 15,
+      "acoes": ["Contestação", "Pagamento"],
+      "gravidade": "crítica",
+      "descricao": "Ação de despejo por falta de pagamento de aluguel"
+    },
+    {
+      "nome": "Alienação Fiduciária",
+      "sinonimos": ["fiduciária", "alienação"],
+      "tipo_processo": ["Cível"],
+      "dias_uteis": 10,
+      "acoes": ["Defesa", "Pagamento"],
+      "gravidade": "alta",
+      "descricao": "Ação para retomada de bem em alienação fiduciária"
+    },
+    {
+      "nome": "Busca e Apreensão",
+      "sinonimos": ["busca", "apreensão"],
+      "tipo_processo": ["Cível"],
+      "dias_uteis": 5,
+      "acoes": ["Impugnação Imediata"],
+      "gravidade": "crítica",
+      "descricao": "Ação para buscar e apreender bem determinado"
+    },
+    {
+      "nome": "IPTU - Imposto Predial Territorial Urbano",
+      "sinonimos": ["iptu", "imposto predial"],
+      "tipo_processo": ["Administrativa"],
+      "dias_uteis": 30,
+      "acoes": ["Defesa Administrativa", "Recurso"],
+      "gravidade": "média",
+      "descricao": "Ação sobre disputa de IPTU"
+    },
+    {
+      "nome": "Seguro",
+      "sinonimos": ["seguro", "sinistro"],
+      "tipo_processo": ["Cível"],
+      "dias_uteis": 15,
+      "acoes": ["Documentação", "Recurso"],
+      "gravidade": "média",
+      "descricao": "Ação sobre contrato de seguro"
+    },
+    {
+      "nome": "Disponibilização no Diário da Justiça Eletrônico",
+      "sinonimos": ["diário", "publicação"],
+      "tipo_processo": ["Cível", "Federal", "Trabalhista"],
+      "dias_uteis": 0,
+      "acoes": ["Ciência de Publicação"],
+      "gravidade": "baixa",
+      "descricao": "Publicação de ato processual"
+    },
+    {
+      "nome": "Documento",
+      "sinonimos": ["documentação", "juntada"],
+      "tipo_processo": ["Cível", "Federal", "Trabalhista"],
+      "dias_uteis": 0,
+      "acoes": ["Análise de Documento"],
+      "gravidade": "baixa",
+      "descricao": "Juntada de documento aos autos"
+    },
+    {
+      "nome": "Distribuição",
+      "sinonimos": ["distribuído"],
+      "tipo_processo": ["Cível", "Federal", "Trabalhista"],
+      "dias_uteis": 0,
+      "acoes": ["Aguardar Designação"],
+      "gravidade": "baixa",
+      "descricao": "Processo distribuído ao juizado"
+    },
+    {
+      "nome": "Contrarrazões",
+      "sinonimos": ["contrarrazão"],
+      "tipo_processo": ["Cível", "Federal"],
+      "dias_uteis": 15,
+      "acoes": ["Aguardar Julgamento"],
+      "gravidade": "média",
+      "descricao": "Resposta a recurso apresentado"
+    }
+  ],
+  "feriados_nacionais": [
+    "01/01", "21/04", "01/05", "07/09", "12/10", "02/11", "15/11", "25/12"
+  ],
+  "notas": {
+    "dias_uteis": "Dias úteis = dias úteis (segunda a sexta), excluindo feriados nacionais",
+    "gravidade": "crítica (vencer em 1-3 dias), alta (3-7 dias), média (7-15 dias), baixa (>15 dias)",
+    "acoes": "Ações sugeridas que podem ser agendadas como tarefas"
+  }
+}
