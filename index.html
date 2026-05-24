@@ -1224,52 +1224,40 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--ink);font
     <div class="pg" id="pg-analise-risco">
       <div id="analise-stats" style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:16px"></div>
 
-      <!-- UPLOAD SECTION -->
+      <!-- SELETOR DE CLIENTE -->
       <div class="dash-sec">
         <div class="sh">
           <div>
-            <span class="st">Nova Análise de Risco com IA</span>
-            <div style="font-size:11px;color:var(--ink3);margin-top:1px">Selecione o cliente e cole o relatório do formulário onboarding ou avaliação periódica</div>
-          </div>
-          <div class="sh-actions" style="flex-wrap:wrap;gap:6px">
-            <input type="file" id="md-upload-file" accept=".md,.txt" style="padding:8px;border:1px solid #bdc3c7;border-radius:4px;flex:1;max-width:200px" />
-            <button class="btn sm primary" onclick="processarMDArquivo()">Carregar arquivo</button>
+            <span class="st">Análise de Risco Jurídico</span>
+            <div style="font-size:11px;color:var(--ink3);margin-top:1px">Dashboard gerado automaticamente a partir dos dados do formulário</div>
           </div>
         </div>
-
-        <div style="margin-top:12px;display:flex;gap:10px;align-items:center;flex-wrap:wrap">
+        <div style="margin-top:12px;display:flex;gap:10px;align-items:flex-end;flex-wrap:wrap">
           <div style="flex:1;min-width:200px">
             <label style="font-size:11px;color:var(--ink3);display:block;margin-bottom:4px">Cliente</label>
-            <select id="ar-cli" style="width:100%;padding:8px 10px;border:1px solid var(--br2);border-radius:7px;font-size:13px">
+            <select id="ar-cli" style="width:100%;padding:8px 10px;border:1px solid var(--br2);border-radius:7px;font-size:13px" onchange="carregarAnaliseCliente()">
               <option value="">— Selecione o cliente —</option>
             </select>
           </div>
           <div style="flex:1;min-width:200px">
-            <label style="font-size:11px;color:var(--ink3);display:block;margin-bottom:4px">Tipo de relatório</label>
-            <select id="ar-tipo" style="width:100%;padding:8px 10px;border:1px solid var(--br2);border-radius:7px;font-size:13px">
+            <label style="font-size:11px;color:var(--ink3);display:block;margin-bottom:4px">Tipo de formulário</label>
+            <select id="ar-tipo" style="width:100%;padding:8px 10px;border:1px solid var(--br2);border-radius:7px;font-size:13px" onchange="carregarAnaliseCliente()">
               <option value="onboarding">Onboarding</option>
               <option value="periodico">Avaliação Periódica</option>
             </select>
           </div>
         </div>
-
-        <div style="margin-top:12px">
-          <label style="font-size:11px;color:var(--ink3);display:block;margin-bottom:6px">Cole o relatório recebido por e-mail:</label>
-          <textarea id="md-textarea" placeholder="Cole aqui o conteúdo do relatório..." style="width:100%;height:180px;padding:12px;border:1px solid #bdc3c7;border-radius:4px;font-family:monospace;font-size:12px;box-sizing:border-box"></textarea>
-          <button class="btn primary" style="margin-top:8px;width:100%;padding:12px;font-size:14px" onclick="processarMDTexto()">Analisar com IA</button>
-        </div>
       </div>
 
-      <!-- RESULTS SECTION -->
-      <div class="dash-sec" id="analise-container" style="display:none;margin-top:16px">
-        <!-- Será preenchido por renderAnaliseRisco() -->
-      </div>
+      <!-- DASHBOARD AUTOMÁTICO -->
+      <div id="analise-container" style="margin-top:16px"></div>
+
+      <!-- PLANO DE AÇÃO COM IA (aparece após clicar o botão) -->
+      <div class="dash-sec" id="plano-ia-resultado" style="display:none;margin-top:16px"></div>
 
       <!-- HISTÓRICO -->
       <div class="dash-sec" id="analises-historico-sec" style="margin-top:16px">
-        <div class="sh">
-          <span class="st">📋 Histórico de Análises</span>
-        </div>
+        <div class="sh"><span class="st">📋 Histórico de Análises</span></div>
         <div id="analises-historico" style="padding:4px 0"></div>
       </div>
     </div>
@@ -2910,50 +2898,30 @@ async function analisarAvaliacaoComIA(cliId, indice){
   if(!cli){ showToast('Cliente não encontrado'); return; }
 
   const avaliacoes = avaliacoesCache[cli.CNPJ||''] || [];
-  const avaliacao = indice !== undefined && indice !== '' ? avaliacoes[indice] : null;
+  const avaliacao = indice !== undefined && indice !== '' ? avaliacoes[parseInt(indice)] : avaliacoes[0];
 
   // Ir para aba de análise
   goPg('analise-risco');
 
-  // Aguardar renderização da aba
   setTimeout(async () => {
     const selectCli = document.getElementById('ar-cli');
     const selectTipo = document.getElementById('ar-tipo');
-    const textarea = document.getElementById('md-textarea');
-
     if(selectCli) selectCli.value = cliId;
     if(selectTipo) selectTipo.value = avaliacao ? 'periodico' : 'onboarding';
 
-    if(avaliacao && textarea){
-      // Converter dados de avaliação para markdown
-      const md = `# Análise de Avaliação Periódica
+    if(avaliacao){
+      const jsonStr = avaliacao['Dados Completos (JSON)'] || avaliacao.formulario_completo;
+      let dadosForm = null;
+      try{ dadosForm = jsonStr ? JSON.parse(jsonStr) : null; }catch(e){}
 
-**Cliente:** ${cli.Nome}
-**CNPJ:** ${cli.CNPJ}
-**Data:** ${avaliacao.Timestamp ? new Date(avaliacao.Timestamp).toLocaleDateString('pt-BR') : '—'}
-
-## Resultados
-
-| Métrica | Valor |
-|---------|-------|
-| **Score Anterior** | ${avaliacao['Score Anterior']||avaliacao.scoreAnterior||0}% |
-| **Score Novo** | ${avaliacao['Score Novo']||avaliacao.scoreNovo||0}% |
-| **Delta** | ${(parseFloat(avaliacao['Score Novo']||avaliacao.scoreNovo||0) - parseFloat(avaliacao['Score Anterior']||avaliacao.scoreAnterior||0)).toFixed(0)}% |
-| **Tendência** | ${avaliacao.Tendência||avaliacao.tendencia||'—'} |
-| **Status** | ${avaliacao.Status||'Recebido'} |
-
-## Dados Completos
-
-${avaliacao['Dados Completos (JSON)'] ? JSON.stringify(JSON.parse(avaliacao['Dados Completos (JSON)']), null, 2) : '—'}
-
----
-*Relatório gerado automaticamente pela plataforma LITTERA*`;
-
-      textarea.value = md;
-
-      // Auto-analisar
-      showToast('🔄 Analisando com IA...');
-      setTimeout(() => processarMDTexto(), 200);
+      const container = document.getElementById('analise-container');
+      if(container && dadosForm){
+        container.innerHTML = renderDashboardAutomatico(dadosForm, cli.Nome, 'periodico');
+      } else if(container){
+        container.innerHTML = renderDashboardAutomatico(avaliacao, cli.Nome, 'periodico');
+      }
+    } else {
+      carregarAnaliseCliente();
     }
   }, 150);
 }
@@ -2961,6 +2929,266 @@ ${avaliacao['Dados Completos (JSON)'] ? JSON.stringify(JSON.parse(avaliacao['Dad
 document.getElementById('av-cli')?.addEventListener('change',renderAvaliacoes);
 document.getElementById('av-mes')?.addEventListener('change',renderAvaliacoes);
 
+// ══════════════════════════════════════════
+//  ANÁLISE AUTOMÁTICA (SEM IA) — Dashboard baseado nos dados do formulário
+// ══════════════════════════════════════════
+
+const CATEGORIAS_RISCO = {
+  'Trabalhista':  ['cct','cctDesc','cargoConfianca','cargoConfiancaDesc','ferias','jornada','epi','afastamentos','acoesTrab','acoesTrabDesc','passivos','passivosDesc','terceirizacao','assedio','assedioDesc'],
+  'Fiscal':       ['regimeTributario','autuacoes','autuacoesDesc','dividas','reclamacoes','reclamacoesDesc'],
+  'LGPD/Dados':   ['mapeamento','dpo','acessodados','anpd','backup'],
+  'Contratual':   ['contratos','contratosRisco','administrador','socios','acoesCiv','acoesCivDesc'],
+  'Governança':   ['codigo','canal','politicaTec','treinamentos','controleVenc','seguros'],
+  'Mercado':      ['publico','exterior','certificacoes','cade','procon','comexterna']
+};
+
+const PESOS = {
+  CRITICO:10, ALTO:7, MEDIO:5, BAIXO:3, INFORMATIVO:1,
+  razaoSocial:'BAIXO', nomeFantasia:'BAIXO', cnpj:'BAIXO', naturezaJuridica:'MEDIO',
+  dataConstituicao:'BAIXO', regimeTributario:'CRITICO', endereco:'BAIXO', filiais:'MEDIO',
+  socios:'CRITICO', administrador:'CRITICO', pep:'ALTO', objetoSocial:'BAIXO', cnae:'MEDIO',
+  segmento:'MEDIO', consumidores:'MEDIO', publico:'ALTO', clientes:'BAIXO', fornecedores:'BAIXO',
+  locais:'MEDIO', exterior:'ALTO', sazonalidade:'BAIXO', certificacoes:'CRITICO', comexterna:'ALTO',
+  empregados:'MEDIO', prestadores:'BAIXO', prestadoresPJ:'BAIXO', estagiarios:'MEDIO',
+  aprendizes:'MEDIO', terceirizacao:'ALTO', terceirizacaoDesc:'ALTO', cct:'CRITICO',
+  cctDesc:'CRITICO', cargoConfianca:'CRITICO', cargoConfiancaDesc:'CRITICO', ferias:'CRITICO',
+  jornada:'CRITICO', epi:'CRITICO', afastamentos:'CRITICO', acoesTrab:'CRITICO',
+  acoesTrabDesc:'CRITICO', acoesCiv:'CRITICO', acoesCivDesc:'CRITICO', autuacoes:'CRITICO',
+  autuacoesDesc:'CRITICO', procon:'ALTO', cade:'CRITICO', anpd:'ALTO', passivos:'CRITICO',
+  passivosDesc:'CRITICO', dividas:'CRITICO', contratosRisco:'ALTO', ambiental:'CRITICO',
+  ambientalDesc:'CRITICO', assedio:'CRITICO', assedioDesc:'CRITICO', reclamacoes:'CRITICO',
+  reclamacoesDesc:'CRITICO', codigo:'MEDIO', canal:'MEDIO', mapeamento:'ALTO', dpo:'ALTO',
+  politicaTec:'MEDIO', contratos:'ALTO', seguros:'ALTO', segurosDesc:'ALTO',
+  controleVenc:'MEDIO', treinamentos:'MEDIO', acessodados:'CRITICO', backup:'CRITICO',
+  motivacao:'INFORMATIVO', riscos:'INFORMATIVO', operacoes:'INFORMATIVO',
+  historico:'INFORMATIVO', adicionais:'INFORMATIVO', email:'INFORMATIVO'
+};
+
+function calcularScoreLocal(dados){
+  if(!dados || typeof dados !== 'object') return null;
+  let obtido=0, maximo=0;
+  const riscosCriticos=[];
+
+  Object.entries(PESOS).forEach(([campo, nivel])=>{
+    if(typeof nivel !== 'string') return;
+    const peso = PESOS[nivel] || 3;
+    maximo += peso;
+    const val = dados[campo];
+    if(val === 'Sim' || (val && typeof val==='string' && val.trim()!=='' && val!=='Não')){
+      obtido += peso;
+    } else if(val === 'Não' && nivel==='CRITICO'){
+      riscosCriticos.push(campo);
+    }
+  });
+
+  const pct = maximo > 0 ? Math.round((obtido/maximo)*100) : 0;
+  const scoresCat = {};
+  Object.entries(CATEGORIAS_RISCO).forEach(([cat, campos])=>{
+    let o=0, m=0;
+    campos.forEach(c=>{
+      const n = PESOS[c]; if(typeof n!=='string') return;
+      const p = PESOS[n]||3; m+=p;
+      const v=dados[c];
+      if(v==='Sim'||(v&&typeof v==='string'&&v.trim()!==''&&v!=='Não')) o+=p;
+    });
+    scoresCat[cat] = m>0 ? Math.round((o/m)*100) : 0;
+  });
+
+  return { percentual:pct, obtido, maximo, riscosCriticos, scoresCat };
+}
+
+function nivelRisco(pct){
+  if(pct>=80) return {label:'Baixo Risco', cor:'var(--grn)', bg:'var(--gbg)', emoji:'✅'};
+  if(pct>=60) return {label:'Risco Moderado', cor:'#1A6B8A', bg:'#DBEAFE', emoji:'🟢'};
+  if(pct>=40) return {label:'Risco Médio', cor:'var(--amb)', bg:'var(--abg)', emoji:'🟡'};
+  if(pct>=20) return {label:'Risco Alto', cor:'#C05C00', bg:'#FFE8CC', emoji:'🟠'};
+  return {label:'Risco Crítico', cor:'var(--red)', bg:'var(--rbg)', emoji:'🔴'};
+}
+
+const LABELS_CAMPO = {
+  regimeTributario:'Regime Tributário', socios:'Estrutura Societária', administrador:'Administrador',
+  cct:'Convenção Coletiva', cargoConfianca:'Cargos de Confiança', ferias:'Controle de Férias',
+  jornada:'Controle de Jornada', epi:'EPIs/Segurança', afastamentos:'Afastamentos',
+  acoesTrab:'Ações Trabalhistas', acoesCiv:'Ações Cíveis', autuacoes:'Autuações Fiscais',
+  procon:'Reclamações PROCON', cade:'Investigação CADE', anpd:'Notificação ANPD/LGPD',
+  passivos:'Passivos Trabalhistas', dividas:'Dívidas Fiscais', certificacoes:'Licenças/Certificações',
+  ambiental:'Compliance Ambiental', assedio:'Política Anti-Assédio', reclamacoes:'Reclamações Trabalhistas',
+  mapeamento:'Mapeamento LGPD', dpo:'DPO Designado', acessodados:'Controle de Acesso',
+  backup:'Política de Backup', contratos:'Contratos Padronizados', contratosRisco:'Contratos de Risco',
+  publico:'Contratos Públicos', exterior:'Operações Exterior', cade:'Investigação CADE'
+};
+
+function renderDashboardAutomatico(dados, clienteNome, tipo){
+  if(!dados || typeof dados !== 'object'){
+    return '<div class="empty">Dados do formulário não disponíveis</div>';
+  }
+
+  const score = calcularScoreLocal(dados);
+  if(!score) return '<div class="empty">Não foi possível calcular score</div>';
+
+  const nivel = nivelRisco(score.percentual);
+  const tipoLabel = tipo==='periodico' ? 'Avaliação Periódica' : 'Onboarding';
+
+  // Gráfico de barras por categoria (CSS puro, sem biblioteca)
+  const barrasHTML = Object.entries(score.scoresCat).map(([cat, pct])=>{
+    const n = nivelRisco(pct);
+    return `<div style="margin-bottom:10px">
+      <div style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:4px">
+        <span style="font-weight:500">${cat}</span>
+        <span style="color:${n.cor};font-weight:600">${pct}%</span>
+      </div>
+      <div style="background:var(--br2);border-radius:4px;height:8px">
+        <div style="width:${pct}%;background:${n.cor};height:8px;border-radius:4px;transition:width .5s"></div>
+      </div>
+    </div>`;
+  }).join('');
+
+  // Lista de riscos críticos
+  const riscosHTML = score.riscosCriticos.length
+    ? score.riscosCriticos.map(c=>`
+        <div style="display:flex;align-items:center;gap:8px;padding:8px 12px;background:var(--rbg);border-radius:6px;margin-bottom:6px">
+          <span style="color:var(--red);font-size:14px">⚠️</span>
+          <span style="font-size:12px;color:var(--ink)">${LABELS_CAMPO[c]||c}</span>
+          <span style="margin-left:auto;font-size:10px;background:var(--red);color:#fff;padding:2px 6px;border-radius:4px">CRÍTICO</span>
+        </div>`).join('')
+    : '<div style="font-size:12px;color:var(--grn);padding:8px">✅ Nenhum risco crítico identificado</div>';
+
+  return `
+    <div style="padding:4px 0">
+      <!-- HEADER -->
+      <div style="background:${nivel.bg};border:1px solid ${nivel.cor};border-radius:10px;padding:16px 20px;margin-bottom:16px;display:flex;align-items:center;gap:16px">
+        <div style="font-size:36px;font-weight:700;color:${nivel.cor};line-height:1">${score.percentual}%</div>
+        <div>
+          <div style="font-size:15px;font-weight:600;color:${nivel.cor}">${nivel.emoji} ${nivel.label}</div>
+          <div style="font-size:11px;color:var(--ink3);margin-top:2px">${clienteNome} · ${tipoLabel}</div>
+        </div>
+        <div style="margin-left:auto;text-align:right;font-size:11px;color:var(--ink3)">
+          ${score.riscosCriticos.length} risco(s) crítico(s)<br>
+          <span>${score.obtido}/${score.maximo} pts</span>
+        </div>
+      </div>
+
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px">
+        <!-- SCORE POR CATEGORIA -->
+        <div class="dash-sec">
+          <div class="sh"><span class="st">Score por Categoria</span></div>
+          <div style="padding:4px 0">${barrasHTML}</div>
+        </div>
+
+        <!-- RISCOS CRÍTICOS -->
+        <div class="dash-sec">
+          <div class="sh"><span class="st">⚠️ Riscos Críticos (${score.riscosCriticos.length})</span></div>
+          <div style="padding:4px 0;max-height:260px;overflow-y:auto">${riscosHTML}</div>
+        </div>
+      </div>
+
+      <!-- BOTÃO IA - APENAS PLANO DE AÇÃO -->
+      <div class="dash-sec" style="border:2px dashed var(--gold-border)">
+        <div style="display:flex;align-items:center;gap:12px;padding:4px 0">
+          <div>
+            <div style="font-size:13px;font-weight:500">Plano de Ação com IA</div>
+            <div style="font-size:11px;color:var(--ink3);margin-top:2px">A IA analisa os riscos identificados e sugere ações estratégicas personalizadas</div>
+          </div>
+          <button class="btn primary" style="white-space:nowrap;padding:10px 16px" onclick="gerarPlanoAcaoIA(${JSON.stringify(dados).replace(/'/g,'&#39;').replace(/"/g,"'")}, '${clienteNome}')">
+            💡 Gerar Plano de Ação com IA
+          </button>
+        </div>
+      </div>
+    </div>`;
+}
+
+async function carregarAnaliseCliente(){
+  const cliId = document.getElementById('ar-cli')?.value;
+  const tipo  = document.getElementById('ar-tipo')?.value || 'onboarding';
+  const container = document.getElementById('analise-container');
+  if(!container) return;
+  if(!cliId){ container.innerHTML=''; return; }
+
+  const cli = DB.clientes.find(c=>c.ID===cliId);
+  if(!cli){ container.innerHTML=''; return; }
+
+  // Buscar dados do formulário no cache de avaliações (Google Sheets)
+  const cnpj = cli.CNPJ || cli.cnpj || '';
+  const avaliacoes = avaliacoesCache[cnpj] || [];
+
+  let dadosFormulario = null;
+
+  if(tipo === 'periodico' && avaliacoes.length){
+    // Usa a avaliação mais recente
+    const ultima = avaliacoes.sort((a,b)=>new Date(b.Timestamp||0)-new Date(a.Timestamp||0))[0];
+    const jsonStr = ultima['Dados Completos (JSON)'] || ultima.formulario_completo;
+    try{ dadosFormulario = JSON.parse(jsonStr); }catch(e){}
+  } else if(tipo === 'onboarding'){
+    // Buscar onboarding do cliente
+    try{
+      container.innerHTML='<div style="padding:20px;text-align:center;color:var(--ink3)">⏳ Buscando dados do onboarding...</div>';
+      const resp = await fetch('/.netlify/functions/buscar-avaliacoes?tipo=onboarding&cnpj='+encodeURIComponent(cnpj));
+      const data = await resp.json();
+      if(data.avaliacoes && data.avaliacoes.length){
+        const ultimo = data.avaliacoes[0];
+        const jsonStr = ultimo['Dados Completos (JSON)'] || ultimo.formulario_completo;
+        try{ dadosFormulario = JSON.parse(jsonStr); }catch(e){}
+      }
+    }catch(e){ console.warn('Erro ao buscar onboarding:', e); }
+  }
+
+  if(!dadosFormulario){
+    container.innerHTML=`<div class="dash-sec" style="text-align:center;padding:40px">
+      <div style="font-size:32px;margin-bottom:12px">📋</div>
+      <div style="font-weight:500;margin-bottom:6px">Nenhum formulário encontrado</div>
+      <div style="font-size:12px;color:var(--ink3)">
+        ${tipo==='periodico'
+          ? 'Sincronize as avaliações ou aguarde o cliente preencher o formulário periódico'
+          : 'Aguarde o cliente preencher o formulário de onboarding'}
+      </div>
+      ${tipo==='periodico' ? '<button class="btn primary" style="margin-top:16px" onclick="sincronizarAvaliacoes(event)">🔄 Sincronizar Avaliações</button>' : ''}
+    </div>`;
+    return;
+  }
+
+  container.innerHTML = renderDashboardAutomatico(dadosFormulario, cli.Nome, tipo);
+  // Reset plano IA
+  const planDiv = document.getElementById('plano-ia-resultado');
+  if(planDiv){ planDiv.style.display='none'; planDiv.innerHTML=''; }
+}
+
+async function gerarPlanoAcaoIA(dados, clienteNome){
+  const container = document.getElementById('analise-container');
+  const score = calcularScoreLocal(dados);
+  if(!score){ showToast('Sem dados para analisar'); return; }
+
+  // Preparar resumo para a IA (sem enviar dados sensíveis desnecessários)
+  const resumo = {
+    empresa: clienteNome,
+    score: score.percentual,
+    nivel: nivelRisco(score.percentual).label,
+    riscosCriticos: score.riscosCriticos.map(c => LABELS_CAMPO[c]||c),
+    scoresCat: score.scoresCat
+  };
+
+  // Mostrar loading
+  const planDiv = document.getElementById('plano-ia-resultado');
+  if(planDiv){
+    planDiv.style.display='block';
+    planDiv.innerHTML='<div style="padding:20px;text-align:center;color:var(--ink3)">⏳ Gerando plano de ação... (pode levar 10-20 segundos)</div>';
+  }
+
+  try{
+    const resp = await fetch('/api/analisar-risco', {
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({ tipo:'plano_acao', dados: resumo })
+    });
+    const result = await resp.json();
+    if(result.plano && planDiv){
+      planDiv.innerHTML=`
+        <div class="sh" style="margin-bottom:12px"><span class="st">💡 Plano de Ação — ${clienteNome}</span></div>
+        <div style="white-space:pre-wrap;font-size:12px;line-height:1.7;color:var(--ink)">${result.plano}</div>`;
+    }
+  }catch(e){
+    if(planDiv) planDiv.innerHTML='<div style="color:var(--red);padding:12px">❌ Erro ao gerar plano: '+e.message+'</div>';
+  }
+}
 
 // ══════════════════════════════════════════
 //  DOCUMENTOS — integração com arquivos HTML externos
