@@ -1727,7 +1727,7 @@ function fazerLogin(){
     usuarioAtual = u;
     sessionStorage.setItem('littera_user', u);
     mostrarApp();
-    loadData();
+    setTimeout(() => loadData(), 100);
   } else {
     document.getElementById('login-error').textContent = 'Usuário ou senha incorretos.';
     setTimeout(()=>document.getElementById('login-error').textContent='',3000);
