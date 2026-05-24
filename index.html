@@ -1774,10 +1774,7 @@ function normalizarData(s){
 
 async function loadData(){
   try{
-    const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), 3000);
-    const r = await fetch(API,{method:'POST',body:JSON.stringify({action:'getAll'}), signal:controller.signal});
-    clearTimeout(timeoutId);
+    const r = await fetch(API,{method:'POST',body:JSON.stringify({action:'getAll'})});
     const d = await r.json();
     if(d.ok){
       DB = d;
