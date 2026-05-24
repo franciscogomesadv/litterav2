@@ -2411,7 +2411,7 @@ async function delCliente(id){
 
 function gerarLinkOnboarding(cliId){
   const cli = DB.clientes.find(c=>c.ID===cliId);
-  const base = 'https://formslittera.netlify.app';
+  const base = 'https://formslittera.netlify.app/index.html';
   const params = cli ? `?empresa=${encodeURIComponent(cli.Nome)}&cnpj=${encodeURIComponent(cli.CNPJ||'')}` : '';
   const link = base + params;
   navigator.clipboard.writeText(link).then(()=>showToast('✅ Link copiado! Envie ao cliente.'));
