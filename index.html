@@ -2795,43 +2795,165 @@ document.getElementById('rel-cli')?.addEventListener('change',renderRelatorio);
 document.getElementById('rel-mes')?.addEventListener('change',renderRelatorio);
 
 // ══════════════════════════════════════════
-//  MATURIDADE (mantida do original, estilo atualizado)
+//  AVALIAÇÕES — Histórico de Avaliações Periódicas com IA
 // ══════════════════════════════════════════
+
+let avaliacoesCache = {};
+let ultimaSincronizacao = null;
+
+async function sincronizarAvaliacoes(){
+  const btn = event?.target;
+  if(btn) btn.disabled = true;
+  showToast('⏳ Sincronizando avaliações...');
+
+  try{
+    const response = await fetch('/.netlify/functions/buscar-avaliacoes');
+    const data = await response.json();
+
+    if(data.success && data.avaliacoes){
+      avaliacoesCache = {};
+      data.avaliacoes.forEach(av => {
+        const cnpj = av.CNPJ || av.cnpj;
+        if(!avaliacoesCache[cnpj]) avaliacoesCache[cnpj] = [];
+        avaliacoesCache[cnpj].push(av);
+      });
+      ultimaSincronizacao = new Date();
+      showToast('✅ Avaliações sincronizadas');
+      renderAvaliacoes();
+    }
+  }catch(e){
+    console.warn('⚠️ Erro ao sincronizar:', e);
+    showToast('⚠️ Erro ao sincronizar avaliações');
+  }
+  if(btn) btn.disabled = false;
+}
+
 function renderAvaliacoes(){
-  const cliId=document.getElementById('av-cli')?.value;
-  const el=document.getElementById('av-container');
+  const cliId = document.getElementById('av-cli')?.value;
+  const el = document.getElementById('av-container');
   if(!cliId){ el.innerHTML='<div class="empty">Selecione um cliente</div>'; return; }
-  const cli=DB.clientes.find(c=>c.ID===cliId);
-  const sts=DB.checklistStatus.filter(s=>s.CliID===cliId);
-  const ok=sts.filter(s=>s.Status==='ok').length;
-  const tot=sts.length||1;
-  const pct=Math.round(ok/tot*100);
-  const areas=['TRABALHISTA','TRIBUTÁRIO','SOCIETÁRIO','LGPD'];
-  const cls=pct>=70?'green':pct>=40?'amber':'red';
-  el.innerHTML=`<div class="mat-wrap">
-    <div class="mat-header">
-      <div><div class="mat-title">Avaliações Jurídicas</div><div class="mat-sub">${cli?.Nome||'Cliente'}</div></div>
-      <div class="mat-score-wrap"><div class="mat-score-num">${pct}%</div><div class="mat-score-lbl">Conformidade geral</div></div>
-    </div>
-    <div class="mat-body">
-      <div class="mat-areas">${areas.map(area=>{
-        const itens=sts.filter(s=>s.Area===area);
-        const aOk=itens.filter(s=>s.Status==='ok').length;
-        const aTot=itens.length||1;
-        const aPct=Math.round(aOk/aTot*100);
-        const aCls=aPct>=70?'green':aPct>=40?'amber':'red';
-        return `<div class="mat-area-card">
-          <div class="mat-area-name">${area}</div>
-          <div class="mat-bar-wrap"><div class="mat-bar ${aCls}" style="width:${aPct}%"></div></div>
-          <div class="mat-area-pct ${aCls}">${aPct}%</div>
-          <div class="mat-area-detail">${aOk} de ${aTot} itens conformes</div>
-        </div>`;
-      }).join('')}</div>
-      <div style="text-align:center;">
-        <span class="mat-status-badge ${cls}">${pct>=70?'✓ Conformidade satisfatória':pct>=40?'⚠ Atenção necessária':'✗ Ação urgente requerida'}</span>
+
+  const cli = DB.clientes.find(c=>c.ID===cliId);
+  const cnpj = cli?.CNPJ || '';
+  const avaliacoes = avaliacoesCache[cnpj] || [];
+
+  if(!avaliacoes.length){
+    el.innerHTML=`<div style="padding:20px;text-align:center">
+      <div style="font-size:14px;color:var(--ink3);margin-bottom:20px">
+        <strong>${cli?.Nome||'Cliente'}</strong><br>
+        <span style="font-size:12px">Histórico de avaliações periódicas</span>
       </div>
+      <div style="background:var(--sf2);border:1px solid var(--br2);border-radius:10px;padding:40px;margin-bottom:20px">
+        <svg viewBox="0 0 24 24" style="width:48px;height:48px;margin:0 auto 12px;opacity:0.4;fill:none;stroke:currentColor;stroke-width:1.5">
+          <path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5c0-1.105.895-2 2-2s2 .895 2 2m0 0H9m11 11v-5a2 2 0 00-2-2H9a2 2 0 00-2 2v5"/>
+        </svg>
+        <p style="color:var(--ink3);font-size:13px;margin:0">
+          <strong>Nenhuma avaliação encontrada</strong><br>
+          <span style="font-size:12px">Clique em sincronizar para buscar avaliações salvas</span>
+        </p>
+      </div>
+      <button class="btn primary" style="width:100%;padding:12px;margin-bottom:10px" onclick="sincronizarAvaliacoes(event)">
+        🔄 Sincronizar Avaliações
+      </button>
+      <button class="btn primary" style="width:100%;padding:12px" onclick="analisarAvaliacaoComIA('${cliId}')">
+        📊 Fazer Análise com IA
+      </button>
+    </div>`;
+    return;
+  }
+
+  const avaliacoesOrdenadas = avaliacoes.sort((a,b) => new Date(b.Timestamp||0) - new Date(a.Timestamp||0));
+  let html = `<div style="padding:12px 0">
+    <div style="margin-bottom:16px;display:flex;gap:10px;justify-content:space-between;align-items:center">
+      <div style="font-size:14px;font-weight:500;color:var(--ink)">${cli?.Nome} • ${avaliacoes.length} avaliação(ões)</div>
+      <button class="btn sm" onclick="sincronizarAvaliacoes(event)">🔄 Sincronizar</button>
     </div>
-  </div>`;
+    <div class="dash-sec">`;
+
+  avaliacoesOrdenadas.forEach((av,idx) => {
+    const data = av.Timestamp ? new Date(av.Timestamp).toLocaleDateString('pt-BR') : '—';
+    const scoreAnt = parseFloat(av['Score Anterior']||av.scoreAnterior||0);
+    const scoreNov = parseFloat(av['Score Novo']||av.scoreNovo||0);
+    const delta = scoreNov - scoreAnt;
+    const tendencia = delta > 0 ? '📈 Melhorou' : delta < 0 ? '📉 Piorou' : '→ Manteve';
+    const statusColor = delta > 0 ? 'var(--grn)' : delta < 0 ? 'var(--red)' : 'var(--amb)';
+
+    html += `<div class="rel-item" style="border:1px solid var(--br2);border-radius:7px;padding:12px;margin-bottom:8px">
+      <div style="display:flex;justify-content:space-between;align-items:start;margin-bottom:10px">
+        <div>
+          <div style="font-weight:500;font-size:13px">${av.Tipo||'Avaliação Periódica'}</div>
+          <div style="font-size:11px;color:var(--ink3)">${data}</div>
+        </div>
+        <div style="text-align:right">
+          <div style="font-size:13px;font-weight:500;color:${statusColor}">${tendencia}</div>
+          <div style="font-size:11px;color:var(--ink3)">Score: ${scoreNov}%</div>
+        </div>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;font-size:12px;color:var(--ink3);margin-bottom:10px">
+        <div>Anterior: <strong style="color:var(--ink)">${scoreAnt}%</strong></div>
+        <div>Delta: <strong style="color:${statusColor}">${delta>0?'+':}${delta.toFixed(0)}%</strong></div>
+      </div>
+      <button class="btn sm primary" style="width:100%;padding:8px;font-size:12px" onclick="analisarAvaliacaoComIA('${cliId}','${idx}')">
+        💡 Analisar esta avaliação com IA
+      </button>
+    </div>`;
+  });
+
+  html += `</div></div>`;
+  el.innerHTML = html;
+}
+
+async function analisarAvaliacaoComIA(cliId, indice){
+  const cli = DB.clientes.find(c=>c.ID===cliId);
+  if(!cli){ showToast('Cliente não encontrado'); return; }
+
+  const avaliacoes = avaliacoesCache[cli.CNPJ||''] || [];
+  const avaliacao = indice !== undefined && indice !== '' ? avaliacoes[indice] : null;
+
+  // Ir para aba de análise
+  goPg('analise-risco');
+
+  // Aguardar renderização da aba
+  setTimeout(async () => {
+    const selectCli = document.getElementById('ar-cli');
+    const selectTipo = document.getElementById('ar-tipo');
+    const textarea = document.getElementById('md-textarea');
+
+    if(selectCli) selectCli.value = cliId;
+    if(selectTipo) selectTipo.value = avaliacao ? 'periodico' : 'onboarding';
+
+    if(avaliacao && textarea){
+      // Converter dados de avaliação para markdown
+      const md = `# Análise de Avaliação Periódica
+
+**Cliente:** ${cli.Nome}
+**CNPJ:** ${cli.CNPJ}
+**Data:** ${avaliacao.Timestamp ? new Date(avaliacao.Timestamp).toLocaleDateString('pt-BR') : '—'}
+
+## Resultados
+
+| Métrica | Valor |
+|---------|-------|
+| **Score Anterior** | ${avaliacao['Score Anterior']||avaliacao.scoreAnterior||0}% |
+| **Score Novo** | ${avaliacao['Score Novo']||avaliacao.scoreNovo||0}% |
+| **Delta** | ${(parseFloat(avaliacao['Score Novo']||avaliacao.scoreNovo||0) - parseFloat(avaliacao['Score Anterior']||avaliacao.scoreAnterior||0)).toFixed(0)}% |
+| **Tendência** | ${avaliacao.Tendência||avaliacao.tendencia||'—'} |
+| **Status** | ${avaliacao.Status||'Recebido'} |
+
+## Dados Completos
+
+${avaliacao['Dados Completos (JSON)'] ? JSON.stringify(JSON.parse(avaliacao['Dados Completos (JSON)']), null, 2) : '—'}
+
+---
+*Relatório gerado automaticamente pela plataforma LITTERA*`;
+
+      textarea.value = md;
+
+      // Auto-analisar
+      showToast('🔄 Analisando com IA...');
+      setTimeout(() => processarMDTexto(), 200);
+    }
+  }, 150);
 }
 
 document.getElementById('av-cli')?.addEventListener('change',renderAvaliacoes);

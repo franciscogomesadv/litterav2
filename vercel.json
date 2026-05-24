@@ -1,14 +1,7 @@
 {
   "version": 2,
+  "outputDirectory": ".",
   "buildCommand": "echo 'Force rebuild' && true",
-  "env": {
-    "ANTHROPIC_API_KEY": "@anthropic_api_key"
-  },
-  "functions": {
-    "api/**/*.js": {
-      "runtime": "nodejs18.x"
-    }
-  },
   "rewrites": [
     {
       "source": "/",
