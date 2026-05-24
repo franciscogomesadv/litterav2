@@ -728,7 +728,6 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--ink);font
 
   <div class="nav-section">
     <div class="nav-label">Operacional</div>
-        <div class="nav-item" id="nav-checklist" onclick="goPg('checklist')">
       <svg class="nav-icon" viewBox="0 0 24 24"><path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2"/><rect x="9" y="3" width="6" height="4" rx="1"/><polyline points="9 12 11 14 15 10"/></svg>
       <span>Checklist</span>
     </div>
@@ -736,7 +735,7 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--ink);font
       <svg class="nav-icon" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
       <span>Relatório</span>
     </div>
-        <div class="nav-item" id="nav-maturidade" onclick="goPg('maturidade')">
+        <div class="nav-item" id="nav-avaliacoes" onclick="goPg('avaliacoes')">
       <svg class="nav-icon" viewBox="0 0 24 24"><path d="M12 20V10"/><path d="M18 20V4"/><path d="M6 20v-4"/></svg>
       <span>Maturidade</span>
     </div>
@@ -998,34 +997,6 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--ink);font
       <div class="clients-grid" id="lc"></div>
     </div>
 
-    <!-- ══ CHECKLIST ══ -->
-    <div class="pg" id="pg-checklist">
-      <div class="filter-bar" style="justify-content:space-between;align-items:center;">
-        <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
-          <select class="filter-sel" id="ck-cli" onchange="renderChecklist()"><option value="">Selecione o cliente</option></select>
-          <select class="filter-sel" id="ck-mes" onchange="renderChecklist()"></select>
-        </div>
-        <div style="display:flex;gap:8px;">
-          <button class="btn" onclick="editarChecklistCliente()">
-            <svg viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
-            Editar checklist
-          </button>
-        </div>
-      </div>
-      <div id="ck-editor" style="display:none;background:var(--sf);border:1px solid var(--jade);border-radius:var(--radius);padding:16px;margin-bottom:14px;">
-        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;">
-          <span style="font-size:12px;font-weight:600;color:var(--ink);">Editar itens: <span id="ck-editor-cliente" style="color:var(--jade);">—</span></span>
-          <div style="display:flex;gap:6px;">
-            <button class="btn sm primary" onclick="salvarChecklistCustom()">Salvar</button>
-            <button class="btn sm" onclick="document.getElementById('ck-editor').style.display='none'">Cancelar</button>
-          </div>
-        </div>
-        <div id="ck-editor-areas"></div>
-        <button class="btn sm" style="margin-top:8px;" onclick="adicionarItemEditor()">+ Adicionar item</button>
-      </div>
-      <div id="ck-container"></div>
-    </div>
-
     <!-- ══ RELATÓRIO ══ -->
     <div class="pg" id="pg-relatorio">
       <div class="filter-bar">
@@ -1035,13 +1006,13 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--ink);font
       <div id="rel-container"></div>
     </div>
 
-    <!-- ══ MATURIDADE ══ -->
-    <div class="pg" id="pg-maturidade">
+    <!-- ══ AVALIAÇÕES ══ -->
+    <div class="pg" id="pg-avaliacoes">
       <div class="filter-bar">
-        <select class="filter-sel" id="mat-cli"><option value="">Selecione o cliente</option></select>
-        <select class="filter-sel" id="mat-mes"></select>
+        <select class="filter-sel" id="av-cli"><option value="">Selecione o cliente</option></select>
+        <select class="filter-sel" id="av-mes"></select>
       </div>
-      <div id="mat-container"></div>
+      <div id="av-container"></div>
     </div>
 
     <!-- ══ DOCUMENTOS ══ -->
@@ -1715,11 +1686,11 @@ function imprimirRelatorio(){
   setTimeout(()=>janela.print(), 500);
 }
 
-function imprimirMaturidade(){
-  const el=document.getElementById('mat-container');
+function imprimirAvaliacoes(){
+  const el=document.getElementById('av-container');
   if(!el||!el.innerHTML.trim()){showToast('Gere o relatório primeiro');return;}
   const w=window.open('','_blank','width=900,height=700');
-  w.document.write('<!DOCTYPE html><html><head><meta charset="UTF-8"><title>Maturidade — Littera</title><style>*{box-sizing:border-box;margin:0;padding:0}body{font-family:Arial,sans-serif;font-size:13px;color:#1a2620;padding:32px}.mat-areas{display:grid;grid-template-columns:repeat(2,1fr);gap:16px;margin-bottom:20px}.mat-area{background:#F2F5F3;border-radius:10px;padding:14px}.mat-area-title{font-size:13px;font-weight:600;color:#2D4A3E;margin-bottom:8px}.mat-bar-wrap{background:#e0e8e4;border-radius:99px;height:8px;margin-bottom:4px}.mat-bar{background:#2D4A3E;border-radius:99px;height:8px}.mat-bar-pct{font-size:11px;color:#7A9488}.mat-item{display:flex;align-items:center;gap:8px;padding:5px 0;border-bottom:1px solid #e8f0ec;font-size:12px}button{display:none}</style></head><body>'+el.innerHTML+'</body></html>');
+  w.document.write('<!DOCTYPE html><html><head><meta charset="UTF-8"><title>Avaliações Jurídicas — Littera</title><style>*{box-sizing:border-box;margin:0;padding:0}body{font-family:Arial,sans-serif;font-size:13px;color:#1a2620;padding:32px}.mat-areas{display:grid;grid-template-columns:repeat(2,1fr);gap:16px;margin-bottom:20px}.mat-area{background:#F2F5F3;border-radius:10px;padding:14px}.mat-area-title{font-size:13px;font-weight:600;color:#2D4A3E;margin-bottom:8px}.mat-bar-wrap{background:#e0e8e4;border-radius:99px;height:8px;margin-bottom:4px}.mat-bar{background:#2D4A3E;border-radius:99px;height:8px}.mat-bar-pct{font-size:11px;color:#7A9488}.mat-item{display:flex;align-items:center;gap:8px;padding:5px 0;border-bottom:1px solid #e8f0ec;font-size:12px}button{display:none}</style></head><body>'+el.innerHTML+'</body></html>');
   w.document.close();
   setTimeout(()=>{w.focus();w.print();},500);
 }
@@ -1855,15 +1826,15 @@ function renderAll(){
 // ══════════════════════════════════════════
 const PAGE_TITLES = {
   dashboard:'Painel', expediente:'Expediente do Dia', processos:'Meus Processos', publicacoes:'Publicações', tarefas:'Tarefas', clientes:'Clientes',
-  checklist:'Checklist', relatorio:'Relatório Mensal', maturidade:'Maturidade Jurídica',
+  relatorio:'Relatório Mensal', avaliacoes:'Avaliações Jurídicas',
   documentos:'Documentos', calendario:'Calendário', radar:'Radar Legislativo',
   usuarios:'Usuários', crm:'CRM', honorarios:'Honorários',
   'peças':'Gerador de Peças', 'analise-risco':'Análise de Risco'
 };
 const PAGE_SUBS = {
   dashboard:'Visão geral do escritório', tarefas:'Gestão de tarefas e prazos',
-  clientes:'Carteira de clientes', checklist:'Conformidade mensal por cliente',
-  relatorio:'Relatório mensal de assessoria', maturidade:'Diagnóstico de maturidade jurídica',
+  clientes:'Carteira de clientes',
+  relatorio:'Relatório mensal de assessoria', avaliacoes:'Histórico de avaliações jurídicas',
   documentos:'Geração de contratos e documentos', calendario:'Agenda e eventos',
   radar:'Monitoramento legislativo', usuarios:'Gestão de usuários',
   crm:'Em desenvolvimento — Fase 2', honorarios:'Em desenvolvimento — Fase 2',
@@ -1881,7 +1852,7 @@ const PAGE_ACTIONS = {
   radar: () => `<button class="btn-topbar" onclick="sincRadar()"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></svg>Sincronizar radar</button><button class="btn-topbar primary" onclick="abrirModalRadar()"><svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>Nova norma</button>`,
   usuarios: () => `<button class="btn-topbar primary" onclick="abrirModalUsuario()"><svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>Novo usuário</button>`,
   relatorio: () => `<button class="btn-topbar" onclick="imprimirRelatorio()"><svg viewBox="0 0 24 24"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 01-2-2v-5a2 2 0 012-2h16a2 2 0 012 2v5a2 2 0 01-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>Imprimir</button>`,
-  maturidade: () => `<button class="btn-topbar" onclick="imprimirMaturidade()"><svg viewBox="0 0 24 24"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 01-2-2v-5a2 2 0 012-2h16a2 2 0 012 2v5a2 2 0 01-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>Imprimir</button>`,
+  avaliacoes: () => `<button class="btn-topbar" onclick="imprimirAvaliacoes()"><svg viewBox="0 0 24 24"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 01-2-2v-5a2 2 0 012-2h16a2 2 0 012 2v5a2 2 0 01-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>Imprimir</button>`,
   documentos: () => `<button class="btn-topbar" onclick="imprimirDocumento()"><svg viewBox="0 0 24 24"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 01-2-2v-5a2 2 0 012-2h16a2 2 0 012 2v5a2 2 0 01-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>Imprimir documento</button>`,
   'analise-risco': () => `<button class="btn-topbar primary" onclick="abrirModalNovaAnalise()"><svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>Nova Análise</button><button class="btn-topbar" onclick="exportarAnalisesPDF()"><svg viewBox="0 0 24 24"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 01-2-2v-5a2 2 0 012-2h16a2 2 0 012 2v5a2 2 0 01-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>Exportar</button>`,
 };
@@ -1909,9 +1880,8 @@ function goPg(id){
   const bc = document.querySelector('.topbar-breadcrumb');
   if(bc) bc.innerHTML = '<span class="topbar-logo-sm">Littera</span><span class="topbar-sep">›</span>';
   if(id==='relatorio') renderRelatorio();
-  if(id==='maturidade') renderMaturidade();
+  if(id==='avaliacoes') renderAvaliacoes();
   if(id==='documentos') initDocumentos();
-  if(id==='checklist') renderChecklist();
   if(id==='calendario'){ renderCalPage(); renderCalendario(); }
 }
 
@@ -2772,9 +2742,9 @@ document.getElementById('rel-mes')?.addEventListener('change',renderRelatorio);
 // ══════════════════════════════════════════
 //  MATURIDADE (mantida do original, estilo atualizado)
 // ══════════════════════════════════════════
-function renderMaturidade(){
-  const cliId=document.getElementById('mat-cli')?.value;
-  const el=document.getElementById('mat-container');
+function renderAvaliacoes(){
+  const cliId=document.getElementById('av-cli')?.value;
+  const el=document.getElementById('av-container');
   if(!cliId){ el.innerHTML='<div class="empty">Selecione um cliente</div>'; return; }
   const cli=DB.clientes.find(c=>c.ID===cliId);
   const sts=DB.checklistStatus.filter(s=>s.CliID===cliId);
@@ -2785,7 +2755,7 @@ function renderMaturidade(){
   const cls=pct>=70?'green':pct>=40?'amber':'red';
   el.innerHTML=`<div class="mat-wrap">
     <div class="mat-header">
-      <div><div class="mat-title">Diagnóstico de Maturidade Jurídica</div><div class="mat-sub">${cli?.Nome||'Cliente'}</div></div>
+      <div><div class="mat-title">Avaliações Jurídicas</div><div class="mat-sub">${cli?.Nome||'Cliente'}</div></div>
       <div class="mat-score-wrap"><div class="mat-score-num">${pct}%</div><div class="mat-score-lbl">Conformidade geral</div></div>
     </div>
     <div class="mat-body">
@@ -2809,8 +2779,8 @@ function renderMaturidade(){
   </div>`;
 }
 
-document.getElementById('mat-cli')?.addEventListener('change',renderMaturidade);
-document.getElementById('mat-mes')?.addEventListener('change',renderMaturidade);
+document.getElementById('av-cli')?.addEventListener('change',renderAvaliacoes);
+document.getElementById('av-mes')?.addEventListener('change',renderAvaliacoes);
 
 
 // ══════════════════════════════════════════
