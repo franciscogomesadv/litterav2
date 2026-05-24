@@ -1820,7 +1820,10 @@ async function loadData(){
       renderAll();
       showToast('Dados atualizados ✓');
     }
-  }catch(e){ showToast('Erro ao carregar dados'); }
+  }catch(e){
+    console.error('❌ loadData erro:', e.name, e.message);
+    showToast('Erro ao carregar dados: ' + e.message);
+  }
 }
 
 function renderAll(){
