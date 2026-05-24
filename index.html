@@ -1227,18 +1227,36 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--ink);font
       <!-- UPLOAD SECTION -->
       <div class="dash-sec">
         <div class="sh">
-          <div><span class="st">📊 Nova Análise de Risco</span><div style="font-size:11px;color:var(--ink3);margin-top:1px">Cole o relatório MD gerado pelo formulário onboarding</div></div>
+          <div>
+            <span class="st">Nova Análise de Risco com IA</span>
+            <div style="font-size:11px;color:var(--ink3);margin-top:1px">Selecione o cliente e cole o relatório do formulário onboarding ou avaliação periódica</div>
+          </div>
           <div class="sh-actions" style="flex-wrap:wrap;gap:6px">
             <input type="file" id="md-upload-file" accept=".md,.txt" style="padding:8px;border:1px solid #bdc3c7;border-radius:4px;flex:1;max-width:200px" />
-            <button class="btn sm primary" onclick="processarMDArquivo()">📁 Carregar</button>
+            <button class="btn sm primary" onclick="processarMDArquivo()">Carregar arquivo</button>
           </div>
         </div>
 
-        <!-- TEXTAREA FOR PASTE -->
+        <div style="margin-top:12px;display:flex;gap:10px;align-items:center;flex-wrap:wrap">
+          <div style="flex:1;min-width:200px">
+            <label style="font-size:11px;color:var(--ink3);display:block;margin-bottom:4px">Cliente</label>
+            <select id="ar-cli" style="width:100%;padding:8px 10px;border:1px solid var(--br2);border-radius:7px;font-size:13px">
+              <option value="">— Selecione o cliente —</option>
+            </select>
+          </div>
+          <div style="flex:1;min-width:200px">
+            <label style="font-size:11px;color:var(--ink3);display:block;margin-bottom:4px">Tipo de relatório</label>
+            <select id="ar-tipo" style="width:100%;padding:8px 10px;border:1px solid var(--br2);border-radius:7px;font-size:13px">
+              <option value="onboarding">Onboarding</option>
+              <option value="periodico">Avaliação Periódica</option>
+            </select>
+          </div>
+        </div>
+
         <div style="margin-top:12px">
-          <label style="font-size:11px;color:var(--ink3);display:block;margin-bottom:6px"><strong>Ou cole o relatório:</strong></label>
-          <textarea id="md-textarea" placeholder="Cole aqui o conteúdo MD do relatório de onboarding..." style="width:100%;height:200px;padding:12px;border:1px solid #bdc3c7;border-radius:4px;font-family:monospace;font-size:12px;box-sizing:border-box"></textarea>
-          <button class="btn primary" style="margin-top:8px;width:100%" onclick="processarMDTexto()">🔍 Processar Relatório</button>
+          <label style="font-size:11px;color:var(--ink3);display:block;margin-bottom:6px">Cole o relatório recebido por e-mail:</label>
+          <textarea id="md-textarea" placeholder="Cole aqui o conteúdo do relatório..." style="width:100%;height:180px;padding:12px;border:1px solid #bdc3c7;border-radius:4px;font-family:monospace;font-size:12px;box-sizing:border-box"></textarea>
+          <button class="btn primary" style="margin-top:8px;width:100%;padding:12px;font-size:14px" onclick="processarMDTexto()">Analisar com IA</button>
         </div>
       </div>
 
@@ -1915,18 +1933,18 @@ function hoje(){ return new Date(); }
 
 function atualizarSelects(){
   const clis = DB.clientes.filter(c=>c.Status==='Ativo');
-  ['fil-cli','rel-cli','mat-cli','ck-cli'].forEach(id=>{
+  ['fil-cli','rel-cli','av-cli','ar-cli'].forEach(id=>{
     const s=document.getElementById(id); if(!s)return;
     const cur=s.value;
     s.innerHTML='<option value="">'+( id==='fil-cli'?'Todos os clientes':'— Selecione o cliente —')+'</option>';
     clis.forEach(cl=>{ const o=document.createElement('option'); o.value=cl.ID; o.textContent=cl.Nome; s.appendChild(o); });
-    if(cur){ s.value=cur; if(id==='ck-cli' && s.value===cur) setTimeout(renderChecklist,100); }
+    if(cur) s.value=cur;
   });
   const us = DB.usuarios;
   const sr = document.getElementById('fil-resp'); if(sr){ const cv=sr.value; sr.innerHTML='<option value="">Todos os responsáveis</option>'; us.forEach(u=>{const o=document.createElement('option');o.value=u.Nome;o.textContent=u.Nome;sr.appendChild(o);}); if(cv)sr.value=cv; }
   const meses=[]; const agora=new Date();
   for(let i=0;i<12;i++){ const d=new Date(agora.getFullYear(),agora.getMonth()-i,1); meses.push(d.toLocaleDateString('pt-BR',{month:'short',year:'numeric'})); }
-  ['rel-mes','mat-mes','ck-mes'].forEach(id=>{
+  ['rel-mes','av-mes'].forEach(id=>{
     const s=document.getElementById(id); if(!s)return;
     s.innerHTML=''; meses.forEach((m,i)=>{ const o=document.createElement('option'); o.value=m; o.textContent=m; if(i===0)o.selected=true; s.appendChild(o); });
   });
@@ -2095,10 +2113,22 @@ function renderClientes(){
         <span class="tag ${x.Tipo==='Recorrente'?'nor':'gold'}">${x.Tipo||'—'}</span>
         ${x.Responsavel?`<span class="tag bl">${x.Responsavel}</span>`:''}
       </div>
-      <div class="client-foot">
+      <div class="client-foot" style="flex-wrap:wrap;gap:5px">
         <button class="btn sm" onclick="abrirModalCliente('${x.ID}')">
           <svg viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
           Editar
+        </button>
+        <button class="btn sm primary" onclick="gerarLinkOnboarding('${x.ID}')" title="Gerar link do formulário de onboarding">
+          <svg viewBox="0 0 24 24"><path d="M10 13a5 5 0 007.54.54l3-3a5 5 0 00-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 00-7.54-.54l-3 3a5 5 0 007.07 7.07l1.71-1.71"/></svg>
+          Onboarding
+        </button>
+        <button class="btn sm" style="background:var(--gold);color:#fff" onclick="gerarLinkPeriodico('${x.ID}')" title="Gerar link de avaliação periódica">
+          <svg viewBox="0 0 24 24"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 11-2.12-9.36L23 10"/></svg>
+          Periódica
+        </button>
+        <button class="btn sm" style="background:var(--pur);color:#fff" onclick="analisarClienteIA('${x.ID}')" title="Analisar com IA">
+          <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 8v4l3 3"/></svg>
+          Análise IA
         </button>
         <button class="btn sm danger" onclick="delCliente('${x.ID}')">Excluir</button>
       </div>
@@ -2398,6 +2428,46 @@ async function delCliente(id){
   if(!confirm('Excluir este cliente?'))return;
   await fetch(API,{method:'POST',body:JSON.stringify({action:'delCliente',id})});
   await loadData();
+}
+
+function gerarLinkOnboarding(cliId){
+  const cli = DB.clientes.find(c=>c.ID===cliId);
+  const base = 'https://formslittera.netlify.app';
+  const params = cli ? `?empresa=${encodeURIComponent(cli.Nome)}&cnpj=${encodeURIComponent(cli.CNPJ||'')}` : '';
+  const link = base + params;
+  navigator.clipboard.writeText(link).then(()=>showToast('✅ Link copiado! Envie ao cliente.'));
+  abrirModal('Link de Onboarding — ' + (cli?.Nome||'Cliente'),`
+    <p style="font-size:13px;margin-bottom:12px">Copie e envie este link para o cliente preencher o formulário de onboarding:</p>
+    <div style="background:var(--sf2);border:1px solid var(--br2);border-radius:8px;padding:12px;word-break:break-all;font-size:12px;font-family:monospace">${link}</div>
+    <button class="btn primary" style="margin-top:12px;width:100%" onclick="navigator.clipboard.writeText('${link}');showToast('Copiado!')">📋 Copiar link</button>
+  `, ()=>fecharModal());
+}
+
+function gerarLinkPeriodico(cliId){
+  const cli = DB.clientes.find(c=>c.ID===cliId);
+  const base = 'https://formslittera.netlify.app/formulario-periodico.html';
+  const params = cli ? `?empresa=${encodeURIComponent(cli.Nome)}&cnpj=${encodeURIComponent(cli.CNPJ||'')}` : '';
+  const link = base + params;
+  navigator.clipboard.writeText(link).then(()=>showToast('✅ Link copiado! Envie ao cliente.'));
+  abrirModal('Link de Avaliação Periódica — ' + (cli?.Nome||'Cliente'),`
+    <p style="font-size:13px;margin-bottom:12px">Copie e envie este link para o cliente preencher a avaliação periódica:</p>
+    <div style="background:var(--sf2);border:1px solid var(--br2);border-radius:8px;padding:12px;word-break:break-all;font-size:12px;font-family:monospace">${link}</div>
+    <button class="btn primary" style="margin-top:12px;width:100%" onclick="navigator.clipboard.writeText('${link}');showToast('Copiado!')">📋 Copiar link</button>
+  `, ()=>fecharModal());
+}
+
+function analisarClienteIA(cliId){
+  const cli = DB.clientes.find(c=>c.ID===cliId);
+  if(!cli){ showToast('Cliente não encontrado'); return; }
+  goPg('analise-risco');
+  setTimeout(()=>{
+    const ta = document.getElementById('md-textarea');
+    if(ta){
+      ta.value = `# Análise de Risco — ${cli.Nome}\n\nCliente: ${cli.Nome}\nCNPJ: ${cli.CNPJ||'—'}\nSetor: ${cli.Setor||'—'}\nResponsável: ${cli.Responsavel||'—'}\n\nCole aqui o relatório de onboarding ou avaliação periódica para análise.`;
+      ta.focus();
+      showToast('Cole o relatório do cliente e clique em Processar');
+    }
+  }, 200);
 }
 
 // ══════════════════════════════════════════
