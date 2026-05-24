@@ -2797,7 +2797,7 @@ async function sincronizarAvaliacoes(){
   showToast('⏳ Sincronizando avaliações...');
 
   try{
-    const response = await fetch('/.netlify/functions/buscar-avaliacoes');
+    const response = await fetch('/api/buscar-avaliacoes');
     const data = await response.json();
 
     if(data.success && data.avaliacoes){
@@ -3122,7 +3122,7 @@ async function carregarAnaliseCliente(){
     // Buscar onboarding do cliente
     try{
       container.innerHTML='<div style="padding:20px;text-align:center;color:var(--ink3)">⏳ Buscando dados do onboarding...</div>';
-      const resp = await fetch('/.netlify/functions/buscar-avaliacoes?tipo=onboarding&cnpj='+encodeURIComponent(cnpj));
+      const resp = await fetch('/api/buscar-avaliacoes?cnpj='+encodeURIComponent(cnpj));
       const data = await resp.json();
       if(data.avaliacoes && data.avaliacoes.length){
         const ultimo = data.avaliacoes[0];
