@@ -2099,8 +2099,9 @@ function renderClientes(){
   if(tipo) c=c.filter(x=>x.Tipo===tipo);
   const el = document.getElementById('lc');
   if(!c.length){ el.innerHTML='<div class="empty"><svg viewBox="0 0 24 24"><circle cx="9" cy="7" r="4"/><path d="M3 21v-2a4 4 0 014-4h4a4 4 0 014 4v2"/></svg>Nenhum cliente</div>'; return; }
-  el.innerHTML = c.map(x=>`
-    <div class="client-card">
+  el.innerHTML = c.map(x=>{
+    const id = x.ID;
+    return `<div class="client-card">
       <div class="client-head">
         <div class="client-av">${initials(x.Nome)}</div>
         <div class="client-info">
@@ -2113,26 +2114,14 @@ function renderClientes(){
         <span class="tag ${x.Tipo==='Recorrente'?'nor':'gold'}">${x.Tipo||'—'}</span>
         ${x.Responsavel?`<span class="tag bl">${x.Responsavel}</span>`:''}
       </div>
-      <div class="client-foot" style="flex-wrap:wrap;gap:5px">
-        <button class="btn sm" onclick="abrirModalCliente('${x.ID}')">
-          <svg viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
-          Editar
-        </button>
-        <button class="btn sm primary" onclick="gerarLinkOnboarding('${x.ID}')" title="Gerar link do formulário de onboarding">
-          <svg viewBox="0 0 24 24"><path d="M10 13a5 5 0 007.54.54l3-3a5 5 0 00-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 00-7.54-.54l-3 3a5 5 0 007.07 7.07l1.71-1.71"/></svg>
-          Onboarding
-        </button>
-        <button class="btn sm" style="background:var(--gold);color:#fff" onclick="gerarLinkPeriodico('${x.ID}')" title="Gerar link de avaliação periódica">
-          <svg viewBox="0 0 24 24"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 11-2.12-9.36L23 10"/></svg>
-          Periódica
-        </button>
-        <button class="btn sm" style="background:var(--pur);color:#fff" onclick="analisarClienteIA('${x.ID}')" title="Analisar com IA">
-          <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 8v4l3 3"/></svg>
-          Análise IA
-        </button>
-        <button class="btn sm danger" onclick="delCliente('${x.ID}')">Excluir</button>
+      <div class="client-foot" style="display:flex;gap:5px;flex-wrap:wrap">
+        <button class="btn sm" onclick="abrirModalCliente('${id}')"><svg viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>Editar</button>
+        <button class="btn sm primary" onclick="gerarLinkOnboarding('${id}')"><svg viewBox="0 0 24 24"><path d="M10 13a5 5 0 007.54.54l3-3a5 5 0 00-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 00-7.54-.54l-3 3a5 5 0 007.07 7.07l1.71-1.71"/></svg>Link Onb.</button>
+        <button class="btn sm" style="background:var(--gold);color:#fff" onclick="gerarLinkPeriodico('${id}')"><svg viewBox="0 0 24 24"><polyline points="23 4 23 10 17 10"/></svg>Link Per.</button>
+        <button class="btn sm danger" onclick="delCliente('${id}')">Excluir</button>
       </div>
-    </div>`).join('');
+    </div>`;
+  }).join('');
 }
 
 // ══════════════════════════════════════════
